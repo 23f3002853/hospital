@@ -1,15 +1,16 @@
-# app.py
-# Integration Layer for IVR (VXML ↔ ACS/BAP Simulation)
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import datetime
-import random
+import uuid
 
-app = FastAPI(title="IVR Integration Layer")
+app = FastAPI(
+    title="Conversational IVR Integration Layer",
+    description="Middleware connecting Legacy VXML IVR with Conversational AI",
+    version="1.0"
+)
 
-# Enable CORS (Frontend / VXML simulator compatibility)
+# Enable CORS for frontend / simulator
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -17,181 +18,132 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# -----------------------------
-# Data Models
-# -----------------------------
+# -------------------------
+# DATA MODELS
+# -------------------------
 
 class StartCallRequest(BaseModel):
-    caller_id: str = "SIMULATOR"
+    caller_id: str = "WEB_SIMULATOR"
 
-class InputRequest(BaseModel):
+class UserInputRequest(BaseModel):
     session_id: str
-    digit: str
+    input_value: str   # DTMF digit or text
+    source: str = "VXML"  # Simulates legacy system
 
-# -----------------------------
-# In-Memory Session Store
-# -----------------------------
+# -------------------------
+# IN-MEMORY SESSION STORE
+# -------------------------
 
 sessions = {}
-call_logs = []
 
-# -----------------------------
-# IVR Menu Definitions
-# -----------------------------
+# -------------------------
+# IVR MENU DEFINITIONS
+# (Legacy VXML logic mapped)
+# -------------------------
 
-MENUS = {
-    "home": {
-        "prompt": "Welcome to the IVR system. Press 1 to continue.",
+IVR_FLOW = {
+    "HOME": {
+        "prompt": "Welcome to Hospital Management IVR. Press 1 for Appointments, 2 for Billing, 3 for Emergency.",
         "options": {
-            "1": {"action": "goto", "target": "main"}
+            "1": "APPOINTMENTS",
+            "2": "BILLING",
+            "3": "EMERGENCY"
         }
     },
-    "main": {
-        "prompt": "Main Menu. Press 1 for Booking, 2 for Status, 9 to repeat, 0 to go back.",
+    "APPOINTMENTS": {
+        "prompt": "Press 1 to book appointment. Press 2 to check status. Press 0 to go back.",
         "options": {
-            "1": {"action": "goto", "target": "booking"},
-            "2": {"action": "goto", "target": "status"},
-            "9": {"action": "repeat"},
-            "0": {"action": "back"}
+            "1": "END_BOOK",
+            "2": "END_STATUS",
+            "0": "HOME"
         }
     },
-    "booking": {
-        "prompt": "Booking Menu. Press 1 for Domestic, 2 for International, 0 to go back.",
+    "BILLING": {
+        "prompt": "Press 1 for outstanding bills. Press 0 to return to main menu.",
         "options": {
-            "1": {"action": "end", "message": "Domestic booking registered."},
-            "2": {"action": "end", "message": "International booking registered."},
-            "0": {"action": "back"}
+            "1": "END_BILL",
+            "0": "HOME"
         }
     },
-    "status": {
-        "prompt": "Flight Status Menu. Press 1 to check status, 0 to go back.",
-        "options": {
-            "1": {"action": "end", "message": "Flight is on time."},
-            "0": {"action": "back"}
-        }
+    "EMERGENCY": {
+        "prompt": "Please hold. Connecting you to emergency services.",
+        "options": {}
     }
 }
 
-# -----------------------------
-# Utility Functions
-# -----------------------------
-
-def get_greeting():
-    hour = datetime.now().hour
-    if hour < 12:
-        return "Good morning"
-    elif hour < 18:
-        return "Good afternoon"
-    else:
-        return "Good evening"
-
-def create_session(caller_id):
-    session_id = f"CALL_{random.randint(100000, 999999)}"
-    sessions[session_id] = {
-        "caller_id": caller_id,
-        "current_menu": "home",
-        "previous_menu": None,
-        "history": [],
-        "invalid_count": 0,
-        "start_time": datetime.now()
-    }
-    return session_id
-
-def end_session(session_id, reason):
-    session = sessions.get(session_id)
-    if session:
-        call_logs.append({
-            "session_id": session_id,
-            "caller_id": session["caller_id"],
-            "history": session["history"],
-            "end_reason": reason,
-            "duration_seconds": (datetime.now() - session["start_time"]).seconds
-        })
-        del sessions[session_id]
-
-# -----------------------------
-# API Endpoints (Connectors)
-# -----------------------------
+# -------------------------
+# START CALL (VXML ENTRY)
+# -------------------------
 
 @app.post("/ivr/start")
 def start_call(request: StartCallRequest):
-    session_id = create_session(request.caller_id)
-    greeting = get_greeting()
+    session_id = str(uuid.uuid4())
+
+    sessions[session_id] = {
+        "caller": request.caller_id,
+        "current_state": "HOME",
+        "start_time": datetime.now(),
+        "history": []
+    }
 
     return {
         "session_id": session_id,
-        "menu": "home",
-        "prompt": f"{greeting}. {MENUS['home']['prompt']}"
+        "prompt": IVR_FLOW["HOME"]["prompt"],
+        "state": "HOME",
+        "integration_note": "Legacy VXML entry mapped to Conversational Flow"
     }
 
+# -------------------------
+# PROCESS USER INPUT
+# -------------------------
+
 @app.post("/ivr/input")
-def process_input(request: InputRequest):
-    session = sessions.get(request.session_id)
+def process_input(data: UserInputRequest):
+
+    session = sessions.get(data.session_id)
+
     if not session:
         return {"error": "Invalid session"}
 
-    current_menu = session["current_menu"]
-    menu_def = MENUS.get(current_menu)
+    current_state = session["current_state"]
+    session["history"].append(data.input_value)
 
-    digit = request.digit
-    session["history"].append(digit)
+    state_config = IVR_FLOW.get(current_state)
 
     # Invalid input handling
-    if digit not in menu_def["options"]:
-        session["invalid_count"] += 1
-
-        if session["invalid_count"] >= 3:
-            end_session(request.session_id, "Too many invalid inputs")
-            return {
-                "action": "hangup",
-                "message": "Too many invalid attempts. Call ended."
-            }
-
+    if data.input_value not in state_config["options"]:
         return {
-            "status": "invalid",
-            "prompt": f"Invalid input. {menu_def['prompt']}"
+            "prompt": state_config["prompt"],
+            "status": "INVALID_INPUT"
         }
 
-    # Reset invalid counter on valid input
-    session["invalid_count"] = 0
-    option = menu_def["options"][digit]
-    action = option["action"]
+    next_state = state_config["options"][data.input_value]
 
-    # Action handlers
-    if action == "goto":
-        session["previous_menu"] = current_menu
-        session["current_menu"] = option["target"]
+    # End states simulate call completion
+    if next_state.startswith("END"):
+        del sessions[data.session_id]
         return {
-            "menu": option["target"],
-            "prompt": MENUS[option["target"]]["prompt"]
+            "action": "HANGUP",
+            "message": f"Request processed successfully ({next_state}). Thank you!"
         }
 
-    if action == "repeat":
-        return {
-            "menu": current_menu,
-            "prompt": menu_def["prompt"]
-        }
+    # Continue IVR flow
+    session["current_state"] = next_state
 
-    if action == "back":
-        prev = session["previous_menu"] or "home"
-        session["current_menu"] = prev
-        return {
-            "menu": prev,
-            "prompt": MENUS[prev]["prompt"]
-        }
+    return {
+        "prompt": IVR_FLOW[next_state]["prompt"],
+        "state": next_state,
+        "real_time": "YES",
+        "integration": "VXML → API → Conversational Engine"
+    }
 
-    if action == "end":
-        end_session(request.session_id, "Completed normally")
-        return {
-            "action": "hangup",
-            "message": option["message"] + " Thank you for calling."
-        }
-
-@app.get("/ivr/logs")
-def get_logs():
-    return call_logs
+# -------------------------
+# HEALTH CHECK
+# -------------------------
 
 @app.get("/")
-def health_check():
-    return {"status": "IVR Integration Layer Running"}
-
+def health():
+    return {
+        "status": "Integration Layer Running",
+        "active_sessions": len(sessions)
+    }
