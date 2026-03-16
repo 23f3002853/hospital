@@ -1,149 +1,60 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import requests
+import sqlite3
 from datetime import datetime
-import uuid
 
-app = FastAPI(
-    title="Conversational IVR Integration Layer",
-    description="Middleware connecting Legacy VXML IVR with Conversational AI",
-    version="1.0"
-)
+app = FastAPI()
 
-# Enable CORS for frontend / simulator
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# -------------------------
-# DATA MODELS
-# -------------------------
-
-class StartCallRequest(BaseModel):
-    caller_id: str = "WEB_SIMULATOR"
-
-class UserInputRequest(BaseModel):
+# Data model for the Voice Bot request
+class IVRInput(BaseModel):
     session_id: str
-    input_value: str   # DTMF digit or text
-    source: str = "VXML"  # Simulates legacy system
+    input_value: str
 
-# -------------------------
-# IN-MEMORY SESSION STORE
-# -------------------------
+RASA_URL = "http://localhost:5005/webhooks/rest/webhook"
 
-sessions = {}
-
-# -------------------------
-# IVR MENU DEFINITIONS
-# (Legacy VXML logic mapped)
-# -------------------------
-
-IVR_FLOW = {
-    "HOME": {
-        "prompt": "Welcome to Hospital Management IVR. Press 1 for Appointments, 2 for Billing, 3 for Emergency.",
-        "options": {
-            "1": "APPOINTMENTS",
-            "2": "BILLING",
-            "3": "EMERGENCY"
-        }
-    },
-    "APPOINTMENTS": {
-        "prompt": "Press 1 to book appointment. Press 2 to check status. Press 0 to go back.",
-        "options": {
-            "1": "END_BOOK",
-            "2": "END_STATUS",
-            "0": "HOME"
-        }
-    },
-    "BILLING": {
-        "prompt": "Press 1 for outstanding bills. Press 0 to return to main menu.",
-        "options": {
-            "1": "END_BILL",
-            "0": "HOME"
-        }
-    },
-    "EMERGENCY": {
-        "prompt": "Please hold. Connecting you to emergency services.",
-        "options": {}
-    }
-}
-
-# -------------------------
-# START CALL (VXML ENTRY)
-# -------------------------
-
-@app.post("/ivr/start")
-def start_call(request: StartCallRequest):
-    session_id = str(uuid.uuid4())
-
-    sessions[session_id] = {
-        "caller": request.caller_id,
-        "current_state": "HOME",
-        "start_time": datetime.now(),
-        "history": []
-    }
-
-    return {
-        "session_id": session_id,
-        "prompt": IVR_FLOW["HOME"]["prompt"],
-        "state": "HOME",
-        "integration_note": "Legacy VXML entry mapped to Conversational Flow"
-    }
-
-# -------------------------
-# PROCESS USER INPUT
-# -------------------------
+# --- NEW: Backend Mapping Function ---
+def log_to_db(session_id, user_input, bot_response):
+    try:
+        conn = sqlite3.connect("hospital_system.db")
+        cursor = conn.cursor()
+        # Logging every interaction for Context/Audit trail
+        cursor.execute(
+            "INSERT INTO call_logs (input, intent, timestamp) VALUES (?, ?, ?)",
+            (user_input, bot_response, datetime.now())
+        )
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Database Logging Error: {e}")
 
 @app.post("/ivr/input")
-def process_input(data: UserInputRequest):
-
-    session = sessions.get(data.session_id)
-
-    if not session:
-        return {"error": "Invalid session"}
-
-    current_state = session["current_state"]
-    session["history"].append(data.input_value)
-
-    state_config = IVR_FLOW.get(current_state)
-
-    # Invalid input handling
-    if data.input_value not in state_config["options"]:
-        return {
-            "prompt": state_config["prompt"],
-            "status": "INVALID_INPUT"
-        }
-
-    next_state = state_config["options"][data.input_value]
-
-    # End states simulate call completion
-    if next_state.startswith("END"):
-        del sessions[data.session_id]
-        return {
-            "action": "HANGUP",
-            "message": f"Request processed successfully ({next_state}). Thank you!"
-        }
-
-    # Continue IVR flow
-    session["current_state"] = next_state
-
-    return {
-        "prompt": IVR_FLOW[next_state]["prompt"],
-        "state": next_state,
-        "real_time": "YES",
-        "integration": "VXML → API → Conversational Engine"
+async def handle_ivr_logic(data: IVRInput):
+    payload = {
+        "sender": data.session_id,
+        "message": data.input_value
     }
 
-# -------------------------
-# HEALTH CHECK
-# -------------------------
+    try:
+        # 1. Bridge NLU
+        response = requests.post(RASA_URL, json=payload)
+        rasa_responses = response.json()
 
-@app.get("/")
-def health():
-    return {
-        "status": "Integration Layer Running",
-        "active_sessions": len(sessions)
-    }
+        # 2. Extract Response
+        if rasa_responses:
+            reply = " ".join([msg.get("text", "") for msg in rasa_responses])
+        else:
+            reply = "I'm sorry, I didn't catch that. Could you repeat it?"
+
+        # 3. Map to Backend (Tracking State)
+        log_to_db(data.session_id, data.input_value, reply)
+
+        return {"prompt": reply, "status": "success"}
+
+    except Exception as e:
+        print(f"Error bridging to Rasa: {e}")
+        return {"prompt": "The hospital system is currently offline.", "status": "error"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -1,0 +1,36 @@
+[
+  {
+    "tag_name": "entity",
+    "ids_to_tags": {
+      "1": "B-department",
+      "2": "I-department",
+      "3": "L-department",
+      "4": "U-department",
+      "5": "B-doctor",
+      "6": "I-doctor",
+      "7": "L-doctor",
+      "8": "U-doctor",
+      "9": "B-time",
+      "10": "I-time",
+      "11": "L-time",
+      "12": "U-time",
+      "0": "O"
+    },
+    "tags_to_ids": {
+      "B-department": 1,
+      "I-department": 2,
+      "L-department": 3,
+      "U-department": 4,
+      "B-doctor": 5,
+      "I-doctor": 6,
+      "L-doctor": 7,
+      "U-doctor": 8,
+      "B-time": 9,
+      "I-time": 10,
+      "L-time": 11,
+      "U-time": 12,
+      "O": 0
+    },
+    "num_tags": 13
+  }
+]

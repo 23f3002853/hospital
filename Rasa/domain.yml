@@ -2,29 +2,68 @@ version: "3.1"
 
 intents:
   - greet
+  - goodbye
   - book_appointment
-  - check_doctor
+  - provide_department
+  - provide_doctor
+  - provide_time
   - hospital_timings
   - emergency
+  - bot_challenge
+
+entities:
+  - department
+  - doctor
+  - time
+
+slots:
+  department:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: department
+  doctor:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: doctor
+  time:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: time
 
 responses:
-
   utter_greet:
-    - text: "Hello. How can I help you today?"
+    - text: "Hello! Welcome to our hospital. How can I assist you?"
 
-  utter_book_appointment:
-    - text: "Sure. I can help you book an appointment."
+  utter_ask_department:
+    - text: "Which department do you need?"
 
-  utter_check_doctor:
-    - text: "Yes. The doctor is available tomorrow."
+  utter_ask_doctor:
+    - text: "Which doctor would you like to consult?"
+
+  utter_ask_time:
+    - text: "When would you like the appointment?"
 
   utter_timings:
-    - text: "Hospital is open from 9 AM to 8 PM."
+    - text: "Our hospital is open from 9 AM to 9 PM."
 
   utter_emergency:
-    - text: "Please stay calm. Connecting you to emergency services."
+    - text: "Please call 108 or visit the emergency ward immediately."
 
-  utter_default:
-    - text: "Sorry, I didn't understand."
+  utter_goodbye:
+    - text: "Goodbye! Take care."
 
-actions: []
+  utter_iamabot:
+    - text: "I am a hospital assistant chatbot built using Rasa."
+
+actions:
+  - action_confirm_appointment
+
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true

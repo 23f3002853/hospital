@@ -8,28 +8,79 @@ nlu:
     - hello
     - hey
     - good morning
+    - good evening
+
+- intent: goodbye
+  examples: |
+    - bye
+    - goodbye
+    - see you later
+    - ok bye
 
 - intent: book_appointment
   examples: |
-    - I want to book appointment
-    - book doctor appointment
+    - I want to book an appointment
+    - book appointment
+    - I need a doctor appointment
     - schedule appointment
-    - I need to see doctor
+    - appointment please
 
-- intent: check_doctor
+- intent: provide_department
   examples: |
-    - is doctor available
-    - doctor availability
-    - when can I see doctor
+    - cardiology
+    - orthopedics
+    - pediatrics
+    - dermatology
+    - neurology
+
+- intent: provide_doctor
+  examples: |
+    - Dr Kumar
+    - Dr Priya
+    - Dr Ravi
+    - Dr Sharma
+
+- intent: provide_time
+  examples: |
+    - tomorrow
+    - today
+    - morning
+    - evening
+    - next monday
 
 - intent: hospital_timings
   examples: |
-    - what are hospital timings
-    - when is hospital open
-    - hospital hours
+    - hospital timings
+    - when does hospital open
+    - hospital open hours
 
 - intent: emergency
   examples: |
-    - this is emergency
-    - I need emergency help
-    - urgent medical help
+    - emergency
+    - this is an emergency
+    - urgent help needed
+
+- intent: bot_challenge
+  examples: |
+    - are you a bot
+    - are you human
+    - am I talking to a bot
+
+- intent: provide_department
+  examples: |
+    - I want [cardiology](department)
+    - [orthopedics](department)
+    - department of [pediatrics](department)
+
+- intent: provide_doctor
+  examples: |
+    - book with [Dr Kumar](doctor)
+    - is [Dr Priya](doctor) available?
+    - [Dr Ravi](doctor)
+  
+- intent: provide_details
+  examples: |
+    - i want to see [Dr. Priya](doctor)
+    - book it for [tomorrow](time)
+    - [cardiology](department) department
+    - book an appointment with [Dr. Kumar](doctor) in [orthopedics](department) for [Monday](time)

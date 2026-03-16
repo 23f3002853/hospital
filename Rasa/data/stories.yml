@@ -1,28 +1,18 @@
 version: "3.1"
 
 stories:
+  - story: greet and help
+    steps:
+      - intent: greet
+      - action: utter_greet
 
-- story: greet
-  steps:
-  - intent: greet
-  - action: utter_greet
-
-- story: book appointment
-  steps:
-  - intent: book_appointment
-  - action: utter_book_appointment
-
-- story: doctor availability
-  steps:
-  - intent: check_doctor
-  - action: utter_check_doctor
-
-- story: hospital timings
-  steps:
-  - intent: hospital_timings
-  - action: utter_timings
-
-- story: emergency help
-  steps:
-  - intent: emergency
-  - action: utter_emergency
+  - story: appointment booking flow
+    steps:
+      - intent: book_appointment
+      - action: utter_ask_department
+      - intent: provide_department
+      - action: utter_ask_doctor
+      - intent: provide_doctor
+      - action: utter_ask_time
+      - intent: provide_time
+      - action: action_confirm_appointment

@@ -1,0 +1,12 @@
+{
+  "0": "book_appointment",
+  "1": "bot_challenge",
+  "2": "emergency",
+  "3": "goodbye",
+  "4": "greet",
+  "5": "hospital_timings",
+  "6": "provide_department",
+  "7": "provide_details",
+  "8": "provide_doctor",
+  "9": "provide_time"
+}

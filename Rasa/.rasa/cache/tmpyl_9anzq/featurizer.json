@@ -1,0 +1,62 @@
+{
+  "type": "MaxHistoryTrackerFeaturizer",
+  "state_featurizer": {
+    "action_texts": [],
+    "entity_tag_specs": [],
+    "feature_states": {
+      "intent": {
+        "back": 0,
+        "book_appointment": 1,
+        "bot_challenge": 2,
+        "emergency": 3,
+        "goodbye": 4,
+        "greet": 5,
+        "hospital_timings": 6,
+        "nlu_fallback": 7,
+        "out_of_scope": 8,
+        "provide_department": 9,
+        "provide_doctor": 10,
+        "provide_time": 11,
+        "restart": 12,
+        "session_start": 13
+      },
+      "action_name": {
+        "action_listen": 0,
+        "action_restart": 1,
+        "action_session_start": 2,
+        "action_default_fallback": 3,
+        "action_deactivate_loop": 4,
+        "action_revert_fallback_events": 5,
+        "action_default_ask_affirmation": 6,
+        "action_default_ask_rephrase": 7,
+        "action_two_stage_fallback": 8,
+        "action_unlikely_intent": 9,
+        "action_back": 10,
+        "...": 11,
+        "action_extract_slots": 12,
+        "action_confirm_appointment": 13,
+        "utter_ask_department": 14,
+        "utter_ask_doctor": 15,
+        "utter_ask_time": 16,
+        "utter_emergency": 17,
+        "utter_goodbye": 18,
+        "utter_greet": 19,
+        "utter_iamabot": 20,
+        "utter_timings": 21
+      },
+      "entities": {
+        "department": 0,
+        "doctor": 1,
+        "time": 2
+      },
+      "slots": {
+        "department_0": 0,
+        "doctor_0": 1,
+        "time_0": 2
+      },
+      "active_loop": {}
+    }
+  },
+  "remove_duplicates": true,
+  "max_history": 5
+}

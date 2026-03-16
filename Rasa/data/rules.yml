@@ -2,12 +2,27 @@ version: "3.1"
 
 rules:
 
-- rule: Say goodbye anytime the user says goodbye
+- rule: greet
+  steps:
+  - intent: greet
+  - action: utter_greet
+
+- rule: goodbye
   steps:
   - intent: goodbye
   - action: utter_goodbye
 
-- rule: Say 'I am a bot' anytime the user challenges
+- rule: hospital timing
+  steps:
+  - intent: hospital_timings
+  - action: utter_timings
+
+- rule: emergency
+  steps:
+  - intent: emergency
+  - action: utter_emergency
+
+- rule: bot challenge
   steps:
   - intent: bot_challenge
   - action: utter_iamabot
