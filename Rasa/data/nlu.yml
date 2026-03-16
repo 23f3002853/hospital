@@ -1,0 +1,35 @@
+version: "3.1"
+
+nlu:
+
+- intent: greet
+  examples: |
+    - hi
+    - hello
+    - hey
+    - good morning
+
+- intent: book_appointment
+  examples: |
+    - I want to book appointment
+    - book doctor appointment
+    - schedule appointment
+    - I need to see doctor
+
+- intent: check_doctor
+  examples: |
+    - is doctor available
+    - doctor availability
+    - when can I see doctor
+
+- intent: hospital_timings
+  examples: |
+    - what are hospital timings
+    - when is hospital open
+    - hospital hours
+
+- intent: emergency
+  examples: |
+    - this is emergency
+    - I need emergency help
+    - urgent medical help

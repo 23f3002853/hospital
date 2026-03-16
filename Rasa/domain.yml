@@ -1,0 +1,30 @@
+version: "3.1"
+
+intents:
+  - greet
+  - book_appointment
+  - check_doctor
+  - hospital_timings
+  - emergency
+
+responses:
+
+  utter_greet:
+    - text: "Hello. How can I help you today?"
+
+  utter_book_appointment:
+    - text: "Sure. I can help you book an appointment."
+
+  utter_check_doctor:
+    - text: "Yes. The doctor is available tomorrow."
+
+  utter_timings:
+    - text: "Hospital is open from 9 AM to 8 PM."
+
+  utter_emergency:
+    - text: "Please stay calm. Connecting you to emergency services."
+
+  utter_default:
+    - text: "Sorry, I didn't understand."
+
+actions: []

@@ -1,0 +1,28 @@
+version: "3.1"
+
+stories:
+
+- story: greet
+  steps:
+  - intent: greet
+  - action: utter_greet
+
+- story: book appointment
+  steps:
+  - intent: book_appointment
+  - action: utter_book_appointment
+
+- story: doctor availability
+  steps:
+  - intent: check_doctor
+  - action: utter_check_doctor
+
+- story: hospital timings
+  steps:
+  - intent: hospital_timings
+  - action: utter_timings
+
+- story: emergency help
+  steps:
+  - intent: emergency
+  - action: utter_emergency
