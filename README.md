@@ -52,7 +52,7 @@ Ensure your hospital_system.db is initialized with appointments and call_logs ta
 
 2. Start the Rasa Action Server (Terminal 1)
 ```bash
-rasa run actions
+rasa run actions ```
 3. Start the Rasa NLU Server (Terminal 2)
 ```bash
 rasa run --enable-api --cors "*" ```
