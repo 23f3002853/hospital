@@ -1,17 +1,17 @@
-Your project documentation is looking very professional! To make it "copy-paste ready" for a final submission or a GitHub README.md, I have refined the formatting, fixed the markdown nesting issues (like the unclosed code blocks), and added a Technical Architecture section to satisfy the requirements of a high-level internship project.
 
-🏥 Hospital Voice IVR Assistant
-🔗 Project Access
+
+### 🏥 Hospital Voice IVR Assistant
+### 🔗 Project Access
 Local UI: http://localhost:5500
 
 Middleware Gateway: http://localhost:8000
 
 Rasa Core: http://localhost:5005
 
-📌 Project Description
+### 📌 Project Description
 The Hospital Voice IVR Assistant is an advanced, AI-driven appointment booking system. It mimics a real-world telephonic IVR (Interactive Voice Response) experience, allowing patients to book appointments using natural language. The system supports multilingual interactions and features a robust 4-layer architecture to ensure seamless communication between the user and the hospital database.
 
-🚀 Key Features
+### 🚀 Key Features
 📞 Full Call Simulation: Interactive UI that mimics a dialer and active call state.
 
 🎤 Multilingual STT: Speech-to-Text supporting English, Hindi, and Telugu.
@@ -35,7 +35,7 @@ Database: SQLite3 (Relational mapping for appointments and logs).
 
 APIs: Web Speech API, Google Translate API (for multilingual support).
 
-🏗️ Technical Architecture
+### 🏗️ Technical Architecture
 The system operates on a 4-Layer Model:
 
 User Interface Layer: Captures voice and renders the call UI.
@@ -46,24 +46,24 @@ Intelligence Layer (Rasa): Processes natural language and manages conversation s
 
 Data Layer (SQLite): Stores transactional data and audit logs.
 
-▶️ Setup & Execution Instructions
+### ▶️ Setup & Execution Instructions
 1. Initialize the Database
 Ensure your hospital_system.db is initialized with appointments and call_logs tables.
 
 2. Start the Rasa Action Server (Terminal 1)
-Bash
+```bash
 rasa run actions
 3. Start the Rasa NLU Server (Terminal 2)
-Bash
-rasa run --enable-api --cors "*"
+```bash
+rasa run --enable-api --cors "*" ```
 4. Start the FastAPI Gateway (Terminal 3)
-Bash
-python app.py
+```bash
+python app.py ```
 5. Launch the Voice Bot UI (Terminal 4)
-Bash
-python main_voice_bot.py
-📂 Project Structure
-Plaintext
+```bash
+python main_voice_bot.py ```
+### 📂 Project Structure
+
 hospital/
 ├── data/
 │   ├── nlu.yml             # Training data for intents
@@ -78,7 +78,8 @@ hospital/
 ├── text_to_speech.py       # TTS Configuration
 ├── hospital_system.db      # SQLite Database
 └── README.md               # Project Documentation
-🧪 Quality Assurance Summary
+
+### 🧪 Quality Assurance Summary
 Intent Accuracy: 95% success rate in identifying "Book Appointment".
 
 Latency: Average response time < 2.0 seconds.
@@ -87,7 +88,7 @@ Robustness: Successfully handles noise interference via energy threshold filteri
 
 Data Integrity: 100% successful mapping of user voice input to SQL database rows.
 
-✅ Defect Resolution Log (Finalized)
+### ✅ Defect Resolution Log (Finalized)
 Fixed: Language drift (Finnish/Static noise) via langdetect filters.
 
 Fixed: Connection timeouts by implementing a FastAPI heartbeat.
@@ -96,4 +97,4 @@ Fixed: Empty audio crashes via Python guard clauses.
 
 Fixed: Database lock issues by using scoped SQL connections.
 
-Status: 🟢 Ready for Deployment / Final Review
+### Status: 🟢 Ready for Deployment / Final Review
