@@ -46,22 +46,8 @@ Intelligence Layer (Rasa): Processes natural language and manages conversation s
 
 Data Layer (SQLite): Stores transactional data and audit logs.
 
-### ▶️ Setup & Execution Instructions
-1. Initialize the Database
-Ensure your hospital_system.db is initialized with appointments and call_logs tables.
 
-2. Start the Rasa Action Server (Terminal 1)
-```bash
-rasa run actions ```
-3. Start the Rasa NLU Server (Terminal 2)
-```bash
-rasa run --enable-api --cors "*" ```
-4. Start the FastAPI Gateway (Terminal 3)
-```bash
-python app.py ```
-5. Launch the Voice Bot UI (Terminal 4)
-```bash
-python main_voice_bot.py ```
+
 ### 📂 Project Structure
 
 hospital/
@@ -98,3 +84,20 @@ Fixed: Empty audio crashes via Python guard clauses.
 Fixed: Database lock issues by using scoped SQL connections.
 
 ### Status: 🟢 Ready for Deployment / Final Review
+
+### ▶️ Setup & Execution Instructions
+1. Initialize the Database
+Ensure your hospital_system.db is initialized with appointments and call_logs tables.
+
+2. Start the Rasa Action Server (Terminal 1)
+```bash
+rasa run actions```
+3. Start the Rasa NLU Server (Terminal 2)
+```bash
+rasa run --enable-api --cors "*"```
+4. Start the FastAPI Gateway (Terminal 3)
+```bash
+python app.py```
+5. Launch the Voice Bot UI (Terminal 4)
+```bash
+python main_voice_bot.py```
